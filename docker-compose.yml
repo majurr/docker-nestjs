@@ -51,6 +51,20 @@ services:
     networks:
       - nestwork
     restart: unless-stopped
+  
+  redis-commander:
+    container_name: ${NODE_ENV}_commander
+    hostname: ${NODE_ENV}_commander
+    image: rediscommander/redis-commander:latest
+    restart: unless-stopped
+    environment:
+    - REDIS_HOSTS=local:redis:6379
+    ports:
+    - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - nestwork
 
   postgres:
     container_name: "${NODE_ENV}_pgsql"
@@ -73,10 +87,15 @@ services:
       - postgres:postgres
     container_name: "${NODE_ENV}_pgadmin"
     image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     volumes:
       - ./pgdata/pgadmin:/root/.pgadmin
     env_file:
       - .env
+    ports:
+      - ${PGADMIN_DEFAULT_PORT}:80
     depends_on:
       - postgres
     networks:
